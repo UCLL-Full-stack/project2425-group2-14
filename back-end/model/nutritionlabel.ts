@@ -1,5 +1,7 @@
 import { Item } from './item';
 
+import { Nutritionlabel as NutritionlabelPrisma } from '@prisma/client';
+
 export class Nutritionlabel {
     private id?: number | undefined;
     private energy: number;
@@ -131,6 +133,7 @@ export class Nutritionlabel {
 
     equals(nutritionlabel: Nutritionlabel): boolean {
         return (
+            this.id === nutritionlabel.getId() &&
             this.energy === nutritionlabel.getEnergy() &&
             this.fat === nutritionlabel.getFat() &&
             this.saturatedFats === nutritionlabel.getSaturatedFats() &&
@@ -140,5 +143,27 @@ export class Nutritionlabel {
             this.salts === nutritionlabel.getSalts() &&
             this.item === nutritionlabel.getItem()
         );
+    }
+
+    static from({
+        id,
+        energy,
+        fat,
+        saturatedFats,
+        carbohydrates,
+        sugar,
+        protein,
+        salts,
+    }: NutritionlabelPrisma) {
+        return new Nutritionlabel({
+            id,
+            energy,
+            fat,
+            saturatedFats,
+            carbohydrates,
+            sugar,
+            protein,
+            salts,
+        });
     }
 }

@@ -1,5 +1,6 @@
 import { Item } from './item';
 import { User } from './user';
+import { Shoppingcart as ShoppingcartPrisma } from '@prisma/client';
 
 export class Shoppingcart {
     private id?: number | undefined;
@@ -73,5 +74,9 @@ export class Shoppingcart {
             this.deliveryDate === shoppingcart.getDeliveryDate() &&
             this.user === shoppingcart.getUser()
         );
+    }
+
+    static from({ id, name, deliveryDate }: ShoppingcartPrisma) {
+        return new Shoppingcart({ id, name, deliveryDate });
     }
 }

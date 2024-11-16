@@ -1,6 +1,8 @@
 import { Role } from '../types';
 import { Shoppingcart } from './shoppingcart';
 
+import { User as UserPrisma } from '@prisma/client';
+
 export class User {
     private id?: number | undefined;
     private email: string;
@@ -66,5 +68,9 @@ export class User {
             this.role === user.getRole() &&
             this.shoppingcarts === user.getShoppingcarts()
         );
+    }
+
+    static from({ id, email, password, role }: UserPrisma) {
+        return new User({ id, email, password, role });
     }
 }

@@ -1,5 +1,5 @@
 type Role = 'user' | 'admin';
-type Category = 'fruits' | 'vegetables' | 'dairy';
+type Category = 'fruits' | 'vegetables' | 'dairys';
 
 type ItemInput = {
     id?: number;

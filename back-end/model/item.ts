@@ -1,6 +1,8 @@
 import { Category } from '../types';
 import { Nutritionlabel } from './nutritionlabel';
 
+import { Item as ItemPrisma } from '@prisma/client';
+
 export class Item {
     private id?: number;
     private name: string;
@@ -83,9 +85,14 @@ export class Item {
         return (
             this.id === item.getId() &&
             this.name === item.getName() &&
+            this.price === item.getPrice() &&
             this.pathToImage === item.getPathToImage() &&
             this.category === item.getCategory() &&
             this.nutritionlabel == item.getNutritionLabel()
         );
+    }
+
+    static from({ id, name, price, pathToImage, category }: ItemPrisma) {
+        return new Item({ id, name, price, pathToImage, category });
     }
 }
