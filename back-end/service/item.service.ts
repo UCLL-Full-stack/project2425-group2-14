@@ -4,7 +4,7 @@ import { ItemInput, NutritionlabelInput } from '../types';
 import { Nutritionlabel } from '../model/nutritionlabel';
 import nutritionlabelDb from '../repository/nutritionlabel.db';
 
-const getAllItems = (): Item[] => {
+const getAllItems = async (): Promise<Item[]> => {
     const items = itemDb.getAll();
     if (!items) {
         throw new Error('No items found');
@@ -13,7 +13,7 @@ const getAllItems = (): Item[] => {
     return items;
 };
 
-const createItem = (item: ItemInput): Item => {
+const createItem = async (item: ItemInput): Promise<Item> => {
     const createdItem = itemDb.create(new Item(item));
     if (!createdItem) {
         throw new Error('Item could not be created');
@@ -22,14 +22,17 @@ const createItem = (item: ItemInput): Item => {
     return createdItem;
 };
 
-const addNutritionLabelToItem = (itemId: number, nutritionlabel: NutritionlabelInput): Item => {
-    const item = itemDb.getById(itemId);
+const addNutritionLabelToItem = async (
+    itemId: number,
+    nutritionlabel: NutritionlabelInput
+): Promise<Item> => {
+    const item = await itemDb.getById(itemId);
 
     if (!item) {
         throw new Error('Item not found');
     }
 
-    const createdNutritionlabel = nutritionlabelDb.create(new Nutritionlabel(nutritionlabel));
+    const createdNutritionlabel = await nutritionlabelDb.create(new Nutritionlabel(nutritionlabel));
 
     if (!createdNutritionlabel) {
         throw new Error('Nutritionlabel could not be created');
@@ -38,7 +41,7 @@ const addNutritionLabelToItem = (itemId: number, nutritionlabel: NutritionlabelI
     return itemDb.addNutritionlabel(item, createdNutritionlabel);
 };
 
-const getItemById = (itemId: number): Item => {
+const getItemById = async (itemId: number): Promise<Item | undefined> => {
     const item = itemDb.getById(itemId);
     if (!item) {
         throw new Error('Item not found');
@@ -47,7 +50,7 @@ const getItemById = (itemId: number): Item => {
     return item;
 };
 
-const deleteItemById = (itemId: number): string => {
+const deleteItemById = async (itemId: number): Promise<string> => {
     const item = itemDb.getById(itemId);
 
     if (!item) {

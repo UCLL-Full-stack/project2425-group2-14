@@ -1,106 +1,49 @@
 import { Item } from '../model/item';
 import { Nutritionlabel } from '../model/nutritionlabel';
+import db from './db';
 
-const items = [
-    new Item({
-        id: 0,
-        name: 'Strawberry',
-        price: 4.19,
-        pathToImage:
-            'https://www.health.com/thmb/zvfL1rCWAPg3XzidfAqURuCmttk=/1500x0/filters:no_upscale():max_bytes(150000):strip_icc()/Strawberries-c5f434e7729e47c5b32c0deaa029386c.jpg',
-        category: 'fruits',
-    }),
-    new Item({
-        id: 1,
-        name: 'Kaki',
-        price: 3.99,
-        pathToImage:
-            'https://www.fruitsnacks.be/media/cache/strip/uploads/media/5d2dc27ab1968/food-1056646-1280.jpg',
-        category: 'fruits',
-    }),
-    new Item({
-        id: 2,
-        name: 'Banana',
-        price: 2.59,
-        pathToImage:
-            'https://nutritionsource.hsph.harvard.edu/wp-content/uploads/2018/08/bananas-1354785_1920.jpg',
-        category: 'fruits',
-    }),
-    new Item({
-        id: 3,
-        name: 'Kiwi',
-        price: 1.39,
-        pathToImage:
-            'https://www.health.com/thmb/YjD1m861zN2cGF4q9bbeu6now64=/1500x0/filters:no_upscale():max_bytes(150000):strip_icc()/Kiwi-a2e9888bfab6474f8d12d2ae0287b356.jpg',
-        category: 'fruits',
-    }),
-    new Item({
-        id: 4,
-        name: 'Blueberries',
-        price: 3.49,
-        pathToImage:
-            'https://images.squarespace-cdn.com/content/v1/58ebe6632994ca71ba304549/1491938746710-RE9ICCSBHSDYRFNJU5WG/image-asset.jpeg',
-        category: 'fruits',
-    }),
-    new Item({
-        id: 5,
-        name: 'Plum',
-        price: 1.29,
-        pathToImage:
-            'https://assets.idahopreferred.com/uploads/2023/09/07170427/Plums-scaled-1.jpg',
-        category: 'fruits',
-    }),
-    new Item({
-        id: 6,
-        name: 'Dragonfruit',
-        price: 4.99,
-        pathToImage:
-            'https://gardenerspath.com/wp-content/uploads/2022/09/Best-Dragon-Fruit-Varieties-FB.jpg',
-        category: 'fruits',
-    }),
-    new Item({
-        id: 7,
-        name: 'Coconut',
-        price: 6.79,
-        pathToImage:
-            'https://www.jiomart.com/images/product/original/590000086/big-coconut-1-pc-approx-350-g-600-g-product-images-o590000086-p590000086-0-202408070949.jpg?im=Resize=(420,420)',
-        category: 'fruits',
-    }),
-];
-
-const getAll = (): Item[] => {
+const getAll = async (): Promise<Item[]> => {
     try {
-        return items;
+        const items = await db.item.findMany();
+        return items.map((item) => Item.from(item));
     } catch (error) {
         console.log(error);
-        throw new Error('Could not get all items');
+        throw new Error(`Database Error : ${error}`);
     }
 };
 
-const create = (item: Item): Item => {
+const create = async (item: Item): Promise<Item> => {
     try {
-        item.setId(items.length);
-
-        const exists = items.find((existingItem) => existingItem.getId() === item.getId());
+        const exists = await db.item.findUnique({ where: { id: item.getId() } });
 
         if (exists) {
             throw new Error('Item already exists');
         }
 
-        items.push(item);
-        return item;
+        const createdItem = await db.item.create({
+            data: {
+                id: item.getId()!,
+                name: item.getName(),
+                price: item.getPrice(),
+                pathToImage: item.getPathToImage(),
+                category: item.getCategory(),
+                nutritionlabelId: item.getNutritionLabel().getId()!,
+            },
+        });
+        return Item.from(createdItem);
     } catch (error) {
-        console.error('Error creating item:', error);
-        throw new Error('Could not create item');
+        console.log(error);
+        throw new Error(`Database Error : ${error}`);
     }
 };
 
-const getById = (id: number): Item | undefined => {
+const getById = async (id: number): Promise<Item | undefined> => {
     try {
-        return items.find((item) => item.getId() === id);
+        const item = await db.item.findUnique({ where: { id } });
+        return item ? Item.from(item) : undefined;
     } catch (error) {
         console.log(error);
-        throw new Error('Could not get item by id');
+        throw new Error(`Database error : ${error}`);
     }
 };
 
@@ -114,21 +57,20 @@ const addNutritionlabel = (item: Item, nutritionlabel: Nutritionlabel): Item => 
     }
 };
 
-const deleteItem = (id: number): string => {
+const deleteItem = async (id: number): Promise<string> => {
     try {
-        const item = items.find((item) => item.getId() === id);
+        const item = await db.item.findUnique({ where: { id } });
 
         if (!item) {
             throw new Error(`Item with id ${id} not found`);
         }
 
-        const index = items.indexOf(item);
-        items.splice(index, 1);
+        await db.item.delete({ where: { id } });
 
-        return `Item ${item.getName()} deleted`;
+        return `Item ${item.name} deleted`;
     } catch (error) {
         console.log(error);
-        throw new Error('Could not delete item');
+        throw new Error(`Database error : ${error}`);
     }
 };
 

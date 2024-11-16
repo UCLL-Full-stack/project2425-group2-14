@@ -2,7 +2,7 @@ import { Nutritionlabel } from '../model/nutritionlabel';
 import nutritionlabelDb from '../repository/nutritionlabel.db';
 import { NutritionlabelInput } from '../types';
 
-const getAllNutritionlabels = (): Nutritionlabel[] => {
+const getAllNutritionlabels = async (): Promise<Nutritionlabel[]> => {
     const nutritionLabels = nutritionlabelDb.getAll();
     if (!nutritionLabels) {
         throw new Error('No nutrition labels found');
@@ -11,7 +11,9 @@ const getAllNutritionlabels = (): Nutritionlabel[] => {
     return nutritionLabels;
 };
 
-const createNutritionlabel = (nutritionlabel: NutritionlabelInput): Nutritionlabel => {
+const createNutritionlabel = async (
+    nutritionlabel: NutritionlabelInput
+): Promise<Nutritionlabel> => {
     const newNutritionlabel = new Nutritionlabel(nutritionlabel);
     const createdNutritionLabel = nutritionlabelDb.create(newNutritionlabel);
     if (!createdNutritionLabel) {

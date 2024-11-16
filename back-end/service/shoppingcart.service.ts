@@ -4,7 +4,7 @@ import itemService from './item.service';
 import itemDb from '../repository/item.db';
 import { ShoppingcartInput } from '../types';
 
-const getAllShoppingcarts = (): Shoppingcart[] => {
+const getAllShoppingcarts = async (): Promise<Shoppingcart[]> => {
     const shoppingcarts = shoppingcartDb.getAll();
     if (!shoppingcarts) {
         throw new Error('No shoppingcarts found');
@@ -13,15 +13,15 @@ const getAllShoppingcarts = (): Shoppingcart[] => {
     return shoppingcarts;
 };
 
-const addItemToShoppingcart = ({
+const addItemToShoppingcart = async ({
     itemId,
     shoppingcartId,
 }: {
     itemId: number;
     shoppingcartId: number;
-}): Shoppingcart => {
-    const item = itemDb.getById(itemId);
-    const shoppingcart = shoppingcartDb.getById(shoppingcartId);
+}): Promise<Shoppingcart> => {
+    const item = await itemDb.getById(itemId);
+    const shoppingcart = await shoppingcartDb.getById(shoppingcartId);
 
     if (!item || item === undefined || !shoppingcart || shoppingcart === undefined) {
         throw new Error('Item or shoppingcart not found');
@@ -32,7 +32,7 @@ const addItemToShoppingcart = ({
     return shoppingcart;
 };
 
-const createShoppingcart = (shoppingcart: ShoppingcartInput): Shoppingcart => {
+const createShoppingcart = async (shoppingcart: ShoppingcartInput): Promise<Shoppingcart> => {
     const newShoppingcart = new Shoppingcart(shoppingcart);
 
     const createdShoppingcart = shoppingcartDb.create(newShoppingcart);

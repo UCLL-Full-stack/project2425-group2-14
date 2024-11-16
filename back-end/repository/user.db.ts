@@ -1,16 +1,13 @@
 import { User } from '../model/user';
+import db from './db';
 
-const users = [
-    new User({ id: 0, email: 'john.doe@mail.com', password: 'John123!', role: 'user' }),
-    new User({ id: 1, email: 'jane.doe@mail.com', password: 'Jane123!', role: 'user' }),
-];
-
-const getAll = (): User[] => {
+const getAll = async (): Promise<User[]> => {
     try {
-        return users;
+        const users = await db.user.findMany();
+        return users.map((user) => User.from(user));
     } catch (error) {
         console.log(error);
-        throw new Error('Could not get all users');
+        throw new Error(`Database Error : ${error}`);
     }
 };
 
