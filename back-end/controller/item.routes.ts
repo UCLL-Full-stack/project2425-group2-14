@@ -149,7 +149,7 @@ const itemRouter = express.Router();
 
 itemRouter.get('/', async (req: Request, res: Response, next: NextFunction) => {
     try {
-        const items = itemService.getAllItems();
+        const items = await itemService.getAllItems();
         res.status(200).json(items);
     } catch (error) {
         res.status(500).json({ message: (error as Error).message });
@@ -203,7 +203,7 @@ itemRouter.get('/', async (req: Request, res: Response, next: NextFunction) => {
 itemRouter.get('/:itemId', async (req: Request, res: Response, next: NextFunction) => {
     try {
         const itemId = parseInt(req.params.itemId);
-        const item = itemService.getItemById(itemId);
+        const item = await itemService.getItemById(itemId);
         res.status(200).json(item);
     } catch (error) {
         res.status(500).json({ message: (error as Error).message });
@@ -254,7 +254,7 @@ itemRouter.get('/:itemId', async (req: Request, res: Response, next: NextFunctio
 
 itemRouter.post('/', async (req: Request, res: Response, next: NextFunction) => {
     try {
-        const item = itemService.createItem(req.body);
+        const item = await itemService.createItem(req.body);
         res.status(201).json(item);
     } catch (error) {
         res.status(500).json({ message: (error as Error).message });
@@ -328,7 +328,7 @@ itemRouter.post(
             const itemId = parseInt(req.params.itemId);
             const nutritionlabel = req.body;
 
-            const item = itemService.addNutritionLabelToItem(itemId, nutritionlabel);
+            const item = await itemService.addNutritionLabelToItem(itemId, nutritionlabel);
             res.status(200).json(item);
         } catch (error) {
             res.status(500).json({ message: (error as Error).message });
@@ -339,7 +339,7 @@ itemRouter.post(
 itemRouter.delete('/:itemId', async (req: Request, res: Response, next: NextFunction) => {
     try {
         const itemId = parseInt(req.params.itemId);
-        const message = itemService.deleteItemById(itemId);
+        const message = await itemService.deleteItemById(itemId);
 
         res.status(200).json({ message });
     } catch (error) {

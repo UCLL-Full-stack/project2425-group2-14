@@ -34,27 +34,22 @@ model Shoppingcart {
   id           Int      @id @default(autoincrement())
   name         String
   deliveryDate DateTime
+  userId       Int?
   items        Item[]
-  user         User     @relation(fields: [userId], references: [id])
-  userId       Int
-  createdAt    DateTime @default(now())
-  updatedAt    DateTime @updatedAt
+  User         User?    @relation(fields: [userId], references: [id])
 
   @@map("shoppingcarts")
 }
 
 model Item {
-  id               Int            @id @default(autoincrement())
+  id               Int             @id @default(autoincrement())
   name             String
   price            Float
   pathToImage      String
   category         Category
-  nutritionlabel   Nutritionlabel @relation(fields: [nutritionlabelId], references: [id])
-  nutritionlabelId Int
-  shoppingcart     Shoppingcart?  @relation(fields: [shoppingcartId], references: [id])
-  shoppingcartId   Int?
-  createdAt        DateTime       @default(now())
-  updatedAt        DateTime       @updatedAt
+  nutritionlabel   Nutritionlabel? @relation(fields: [nutritionlabelId], references: [id])
+  shoppingcarts    Shoppingcart[]
+  nutritionlabelId Int?            @unique
 
   @@map("items")
 }
@@ -68,9 +63,9 @@ model Nutritionlabel {
   sugar         Float
   protein       Float
   salts         Float
-  items         Item[]
   createdAt     DateTime @default(now())
   updatedAt     DateTime @updatedAt
+  item          Item?
 
   @@map("nutritionlabels")
 }

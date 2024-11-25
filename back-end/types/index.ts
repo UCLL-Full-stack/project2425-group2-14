@@ -7,6 +7,7 @@ type ItemInput = {
     price: number;
     pathToImage: string;
     category: Category;
+    nutritionlabel?: NutritionlabelInput;
 };
 
 type NutritionlabelInput = {

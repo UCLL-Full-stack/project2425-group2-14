@@ -75,7 +75,7 @@ export class Nutritionlabel {
     }
 
     setItem(item: Item) {
-        this.item == item;
+        this.item = item;
     }
 
     validate(nutritionlabel: {
@@ -108,25 +108,25 @@ export class Nutritionlabel {
         if (nutritionlabel.salts < 0) {
             throw new Error('Salts must be a positive value');
         }
-        if (!nutritionlabel.energy) {
+        if (nutritionlabel.energy == null) {
             throw new Error('Energy is required');
         }
-        if (!nutritionlabel.fat) {
+        if (nutritionlabel.fat == null) {
             throw new Error('Fat is required');
         }
-        if (!nutritionlabel.saturatedFats) {
+        if (nutritionlabel.saturatedFats == null) {
             throw new Error('Saturated fats are required');
         }
-        if (!nutritionlabel.carbohydrates) {
+        if (nutritionlabel.carbohydrates == null) {
             throw new Error('Carbohydrates is required');
         }
-        if (!nutritionlabel.sugar) {
+        if (nutritionlabel.sugar == null) {
             throw new Error('Sugar is required');
         }
-        if (!nutritionlabel.protein) {
+        if (nutritionlabel.protein == null) {
             throw new Error('Protein is required');
         }
-        if (!nutritionlabel.salts) {
+        if (nutritionlabel.salts == null) {
             throw new Error('Salts is required');
         }
     }

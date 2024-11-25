@@ -135,7 +135,7 @@ const nutritionlabelRouter = express.Router();
 
 nutritionlabelRouter.get('/', async (req: Request, res: Response, next: NextFunction) => {
     try {
-        const nutritionlabels = nutritionlabelService.getAllNutritionlabels();
+        const nutritionlabels = await nutritionlabelService.getAllNutritionlabels();
         res.status(200).json(nutritionlabels);
     } catch (error) {
         res.status(500).json({ message: (error as Error).message });
@@ -188,7 +188,7 @@ nutritionlabelRouter.get('/', async (req: Request, res: Response, next: NextFunc
 nutritionlabelRouter.post('/', async (req: Request, res: Response, next: NextFunction) => {
     try {
         const nutritionlabel = req.body;
-        const newNutritionlabel = nutritionlabelService.createNutritionlabel(nutritionlabel);
+        const newNutritionlabel = await nutritionlabelService.createNutritionlabel(nutritionlabel);
         res.status(201).json(newNutritionlabel);
     } catch (error) {
         res.status(500).json({ message: (error as Error).message });

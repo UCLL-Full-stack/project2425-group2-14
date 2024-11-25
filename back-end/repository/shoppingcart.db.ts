@@ -2,7 +2,7 @@ import { Item } from '../model/item';
 import { Shoppingcart } from '../model/shoppingcart';
 import db from './db';
 
-const addItemToShoppingcart = ({
+const addItemToShoppingcart = async ({
     item,
     shoppingcart,
 }: {
@@ -10,17 +10,39 @@ const addItemToShoppingcart = ({
     shoppingcart: Shoppingcart;
 }) => {
     try {
-        shoppingcart.addItem(item);
+        // Add the item to the shopping cart in the database
+        const updatedShoppingcart = await db.shoppingcart.update({
+            where: { id: shoppingcart.getId() },
+            data: {
+                items: {
+                    connect: [{ id: item.getId() }], // Associate the item with the cart
+                },
+            },
+            include: { items: true }, // Fetch the updated list of items in the shopping cart
+        });
+
+        if (!updatedShoppingcart) {
+            throw new Error('Could not update the shoppingcart');
+        }
+
+        // Update the in-memory shoppingcart representation
+        shoppingcart = await Shoppingcart.from(updatedShoppingcart, updatedShoppingcart.items);
     } catch (error) {
-        console.log(error);
+        console.error('Error adding item to shoppingcart:', error);
         throw new Error('Could not add item to shoppingcart');
     }
 };
 
 const getAll = async (): Promise<Shoppingcart[]> => {
     try {
-        const shoppingcarts = await db.shoppingcart.findMany();
-        return shoppingcarts.map((shoppingcart) => Shoppingcart.from(shoppingcart));
+        const shoppingcarts = await db.shoppingcart.findMany({
+            orderBy: { id: 'asc' },
+            include: { items: true },
+        });
+        const shoppingcartPromises = shoppingcarts.map((shoppingcart) =>
+            Shoppingcart.from(shoppingcart, shoppingcart.items)
+        );
+        return await Promise.all(shoppingcartPromises);
     } catch (error) {
         console.log(error);
         throw new Error(`Database Error : ${error}`);
@@ -29,8 +51,11 @@ const getAll = async (): Promise<Shoppingcart[]> => {
 
 const getById = async (id: number): Promise<Shoppingcart | undefined> => {
     try {
-        const shoppingcart = await db.shoppingcart.findUnique({ where: { id } });
-        return shoppingcart ? Shoppingcart.from(shoppingcart) : undefined;
+        const shoppingcart = await db.shoppingcart.findUnique({
+            where: { id },
+            include: { items: true },
+        });
+        return shoppingcart ? Shoppingcart.from(shoppingcart, shoppingcart.items) : undefined;
     } catch (error) {
         console.log(error);
         throw new Error(`Database error : ${error}`);
@@ -39,26 +64,18 @@ const getById = async (id: number): Promise<Shoppingcart | undefined> => {
 
 const create = async (shoppingcart: Shoppingcart): Promise<Shoppingcart> => {
     try {
-        const exists = await db.shoppingcart.findUnique({ where: { id: shoppingcart.getId() } });
-
-        if (exists) {
-            throw new Error('Shoppingcart already exists');
-        }
-
-        const createdShoppingCart = await db.shoppingcart.create({
+        const shoppingcartPrisma = await db.shoppingcart.create({
             data: {
-                id: shoppingcart.getId()!,
                 name: shoppingcart.getName(),
                 deliveryDate: shoppingcart.getDeliveryDate(),
                 userId: shoppingcart.getUser().getId()!,
                 items: {
-                    connect: shoppingcart.getItems().map((item) => ({
-                        id: item.getId(),
-                    })),
+                    connect: shoppingcart.getItems().map((item) => ({ id: item.getId() })),
                 },
             },
+            include: { items: true },
         });
-        return Shoppingcart.from(createdShoppingCart);
+        return Shoppingcart.from(shoppingcartPrisma, shoppingcartPrisma.items);
     } catch (error) {
         console.log(error);
         throw new Error(`Database error : ${error}`);

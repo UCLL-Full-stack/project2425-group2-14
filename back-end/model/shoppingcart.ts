@@ -1,6 +1,6 @@
 import { Item } from './item';
 import { User } from './user';
-import { Shoppingcart as ShoppingcartPrisma } from '@prisma/client';
+import { Shoppingcart as ShoppingcartPrisma, Item as ItemPrisma } from '@prisma/client';
 
 export class Shoppingcart {
     private id?: number | undefined;
@@ -76,7 +76,15 @@ export class Shoppingcart {
         );
     }
 
-    static from({ id, name, deliveryDate }: ShoppingcartPrisma) {
-        return new Shoppingcart({ id, name, deliveryDate });
+    static async from({ id, name, deliveryDate }: ShoppingcartPrisma, items: ItemPrisma[]) {
+        const shoppingcart = new Shoppingcart({
+            id,
+            name,
+            deliveryDate,
+        });
+
+        shoppingcart.items = await Promise.all(items.map((item: ItemPrisma) => Item.from(item)));
+
+        return shoppingcart;
     }
 }

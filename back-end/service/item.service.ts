@@ -14,7 +14,10 @@ const getAllItems = async (): Promise<Item[]> => {
 };
 
 const createItem = async (item: ItemInput): Promise<Item> => {
-    const createdItem = itemDb.create(new Item(item));
+    const nutritionlabel = item.nutritionlabel
+        ? new Nutritionlabel(item.nutritionlabel)
+        : undefined;
+    const createdItem = itemDb.create(new Item({ ...item, nutritionlabel }));
     if (!createdItem) {
         throw new Error('Item could not be created');
     }

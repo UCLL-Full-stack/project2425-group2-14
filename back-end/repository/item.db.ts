@@ -4,8 +4,11 @@ import db from './db';
 
 const getAll = async (): Promise<Item[]> => {
     try {
-        const items = await db.item.findMany();
-        return items.map((item) => Item.from(item));
+        const items = await db.item.findMany({
+            orderBy: { id: 'asc' },
+            include: { nutritionlabel: true },
+        });
+        return Promise.all(items.map((item) => Item.from(item)));
     } catch (error) {
         console.log(error);
         throw new Error(`Database Error : ${error}`);
@@ -14,22 +17,23 @@ const getAll = async (): Promise<Item[]> => {
 
 const create = async (item: Item): Promise<Item> => {
     try {
-        const exists = await db.item.findUnique({ where: { id: item.getId() } });
+        const nutritionLabel = item.getNutritionLabel();
 
-        if (exists) {
-            throw new Error('Item already exists');
+        const data: any = {
+            name: item.getName(),
+            price: item.getPrice(),
+            pathToImage: item.getPathToImage(),
+            category: item.getCategory(),
+        };
+
+        if (nutritionLabel) {
+            data.nutritionlabel = { connect: { id: nutritionLabel.getId() } };
         }
 
         const createdItem = await db.item.create({
-            data: {
-                id: item.getId()!,
-                name: item.getName(),
-                price: item.getPrice(),
-                pathToImage: item.getPathToImage(),
-                category: item.getCategory(),
-                nutritionlabelId: item.getNutritionLabel().getId()!,
-            },
+            data,
         });
+
         return Item.from(createdItem);
     } catch (error) {
         console.log(error);
@@ -47,10 +51,16 @@ const getById = async (id: number): Promise<Item | undefined> => {
     }
 };
 
-const addNutritionlabel = (item: Item, nutritionlabel: Nutritionlabel): Item => {
+const addNutritionlabel = async (item: Item, nutritionlabel: Nutritionlabel): Promise<Item> => {
     try {
         item.setNutritionLabel(nutritionlabel);
-        return item;
+        const updatedItem = await db.item.update({
+            where: { id: item.getId() },
+            data: {
+                nutritionlabelId: nutritionlabel.getId(),
+            },
+        });
+        return Item.from(updatedItem);
     } catch (error) {
         console.log(error);
         throw new Error('Could not add nutritionlabel to item');

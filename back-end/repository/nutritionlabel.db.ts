@@ -3,27 +3,30 @@ import db from './db';
 
 const getAll = async (): Promise<Nutritionlabel[]> => {
     try {
-        const nutritionlabels = await db.nutritionlabel.findMany();
-        return nutritionlabels.map((nutritionlabel) => Nutritionlabel.from(nutritionlabel));
+        const nutritionlabels = await db.nutritionlabel.findMany({ orderBy: { id: 'asc' } });
+        return nutritionlabels.map((nutritionlabel) => {
+            return Nutritionlabel.from(nutritionlabel);
+        });
     } catch (error) {
         console.log(error);
-        throw new Error('Could not get all nutritionlabels');
+        throw new Error(`Database Error : ${error}`);
+    }
+};
+
+const getById = async (id: number): Promise<Nutritionlabel | undefined> => {
+    try {
+        const nutritionlabel = await db.nutritionlabel.findUnique({ where: { id } });
+        return nutritionlabel ? Nutritionlabel.from(nutritionlabel) : undefined;
+    } catch (error) {
+        console.log(error);
+        throw new Error(`Database error : ${error}`);
     }
 };
 
 const create = async (nutritionlabel: Nutritionlabel): Promise<Nutritionlabel> => {
     try {
-        const exists = await db.nutritionlabel.findUnique({
-            where: { id: nutritionlabel.getId() },
-        });
-
-        if (exists) {
-            throw new Error('Nutritionlabel already exists');
-        }
-
         const createdNutritionlabel = await db.nutritionlabel.create({
             data: {
-                id: nutritionlabel.getId()!,
                 energy: nutritionlabel.getEnergy(),
                 fat: nutritionlabel.getFat(),
                 saturatedFats: nutritionlabel.getSaturatedFats(),
@@ -43,5 +46,6 @@ const create = async (nutritionlabel: Nutritionlabel): Promise<Nutritionlabel> =
 
 export default {
     getAll,
+    getById,
     create,
 };

@@ -1,6 +1,5 @@
 import shoppingcartDb from '../repository/shoppingcart.db';
 import { Shoppingcart } from '../model/shoppingcart';
-import itemService from './item.service';
 import itemDb from '../repository/item.db';
 import { ShoppingcartInput } from '../types';
 
@@ -23,13 +22,18 @@ const addItemToShoppingcart = async ({
     const item = await itemDb.getById(itemId);
     const shoppingcart = await shoppingcartDb.getById(shoppingcartId);
 
-    if (!item || item === undefined || !shoppingcart || shoppingcart === undefined) {
+    if (!item || !shoppingcart) {
         throw new Error('Item or shoppingcart not found');
     }
 
-    shoppingcartDb.addItemToShoppingcart({ item, shoppingcart });
+    await shoppingcartDb.addItemToShoppingcart({ item, shoppingcart });
 
-    return shoppingcart;
+    const updatedShoppingcart = await shoppingcartDb.getById(shoppingcartId);
+    if (!updatedShoppingcart) {
+        throw new Error('Failed to retrieve updated shoppingcart');
+    }
+
+    return updatedShoppingcart;
 };
 
 const createShoppingcart = async (shoppingcart: ShoppingcartInput): Promise<Shoppingcart> => {
